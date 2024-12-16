@@ -1,0 +1,16 @@
+This lambda function performs the following
+1. Creates a temporary table in the database with the query:
+```sql
+CREATE TEMPORARY TABLE foo (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    value VARCHAR(255) NOT NULL
+);
+```
+2. Inserts two rows:
+```sql
+INSERT INTO foo (value) VALUES ('test'), ('another')
+```
+3. Queries for all rows
+```sql
+SELECT * FROM foo
+```
