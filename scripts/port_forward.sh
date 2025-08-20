@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-kubectl port-forward services/localstack 4566
+kubectl port-forward -n workspace svc/localstack-env-1 4566

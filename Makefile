@@ -1,27 +1,44 @@
+OPERATOR_PATH ?=
+
+ifndef OPERATOR_PATH
+$(error OPERATOR_PATH not set)
+endif
+
 usage:                    ## Show this help
 	@grep -Fh "##" $(MAKEFILE_LIST) | grep -Fv fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "%-25s %s\n", $$1, $$2 }'
 
-start: start-cluster deploy-operator
+start: start-cluster
 
 start-cluster:
 	bash ./scripts/start_cluster.sh
 
-deploy-localstack:
-	bash ./scripts/deploy_localstack.sh
-
 deploy-operator:
-	docker build -t ls-operator .
-	minikube image load ls-operator
-	kubectl apply -f ./operator.yml
+	kubectl apply --server-side -f $(OPERATOR_PATH)/release/crd.yaml
+	kubectl apply --server-side -f $(OPERATOR_PATH)/release/controller.yaml
+
+destroy-operator:
+	kubectl delete -f $(OPERATOR_PATH)/release/controller.yaml
+
+deploy-localstack-instance: deploy-secret
+	kubectl apply --server-side -f ./localstack-instance.yml
+
+destroy-localstack-instance: destroy-secret
+	kubectl delete -f ./localstack-instance.yml
+
+deploy-secret:
+	bash ./scripts/manage_secret.sh deploy
+
+destroy-secret:
+	bash ./scripts/manage_secret.sh destroy
 
 k9s:
 	k9s --logoless -r 1 --headless --crumbsless -A
 
-debug-dns:
-	kubectl run -i --tty --rm debug --image ghcr.io/simonrw/docker-debug:main --restart=Never -- dig +short localhost.localstack.cloud
+debug-container:
+	kubectl run -i --tty --rm debug-$(shell uuidgen) --image ghcr.io/simonrw/docker-debug:main --restart=Never -- sh
 
 logs: ## Show localstack logs
-	while ! kubectl logs -f service/localstack 2>/dev/null; do sleep 5; done
+	while ! kubectl logs -n workspace -f svc/localstack-env-1 2>/dev/null; do sleep 5; done
 
 watchpods:
 	watch -n 1 kubectl get pods -A
@@ -37,6 +54,9 @@ plan:  ## Execute terraform plan
 
 apply:  ## Deploy terraform application
 	AWS_PROFILE=localstack tflocal apply -auto-approve
+
+destroy-app:  ## Destroy the application
+	AWS_PROFILE=localstack tflocal apply -destroy -auto-approve
 
 reset: ## Reset terraform state
 	rm -f terraform.tfstate terraform.tfstate.backup
