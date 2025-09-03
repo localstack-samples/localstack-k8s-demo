@@ -1,8 +1,4 @@
-OPERATOR_PATH ?=
-
-ifndef OPERATOR_PATH
-$(error OPERATOR_PATH not set)
-endif
+OPERATOR_VERSION ?= latest
 
 usage:                    ## Show this help
 	@grep -Fh "##" $(MAKEFILE_LIST) | grep -Fv fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "%-25s %s\n", $$1, $$2 }'
@@ -13,11 +9,10 @@ start-cluster:
 	bash ./scripts/start_cluster.sh
 
 deploy-operator:
-	kubectl apply --server-side -f $(OPERATOR_PATH)/release/crd.yaml
-	kubectl apply --server-side -f $(OPERATOR_PATH)/release/controller.yaml
+	kubectl apply --server-side -f https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
 
 destroy-operator:
-	kubectl delete -f $(OPERATOR_PATH)/release/controller.yaml
+	kubectl delete -f  https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
 
 deploy-localstack-instance: deploy-secret
 	kubectl apply --server-side -f ./localstack-instance.yml

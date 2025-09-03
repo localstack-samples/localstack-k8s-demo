@@ -37,16 +37,15 @@ architecture-beta
 
 ## Walkthrough
 
-1. Locate your operator manifest path. Replace the value `OPERATOR_PATH` with this value and execute `export OPERATOR_PATH=...`
-2. Deploy the cluster: `make start`
+1. Deploy the cluster: `make start`
     - This starts a local Kubernetes cluster using `minikube` and fetches the Docker images for LocalStack and the demo application
-3. Start the LocalStack operator: `make deploy-operator` (this might block the shell)
-4. Deploy LocalStack: `make deploy-localstack-instance port-forward`
+2. Start the LocalStack operator: `make deploy-operator`. By default this uses the latest version, but you can specify `make deploy-operator OPERATOR_VERSION=v0.4.0` for example to use a specific version.
+3. Deploy LocalStack: `make deploy-localstack-instance port-forward`
     - This installs LocalStack into the Kubernetes cluster using our Kubernetes operator
-    - It also port forwards port 4566 to the host
-5. Deploy application: `make reset apply`
+    - It also port forwards port 4566 to the host (blocks the shell)
+4. Deploy application: `make reset apply`
     - This resets the terraform state and applies the Terraform configuration, which creates the database and Lambda function
-6. Invoke the lambda function: `make invoke`
+5. Invoke the lambda function: `make invoke`
     - This invokes the Lambda function and demonstrates that it can connect to the database
 
 ## Cleanup
