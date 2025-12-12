@@ -42,22 +42,22 @@ port-forward: ## Forward the LocalStack port to the host
 	while ! bash ./scripts/port_forward.sh; do sleep 5; done
 
 init:  ## Set up terraform project
-	AWS_PROFILE=localstack tflocal init
+	tflocal init
 
 plan:  ## Execute terraform plan
-	AWS_PROFILE=localstack tflocal plan
+	tflocal plan
 
 apply:  ## Deploy terraform application
-	AWS_PROFILE=localstack tflocal apply -auto-approve
+	tflocal apply -auto-approve
 
 destroy-app:  ## Destroy the application
-	AWS_PROFILE=localstack tflocal apply -destroy -auto-approve
+	tflocal apply -destroy -auto-approve
 
 reset: ## Reset terraform state
 	rm -f terraform.tfstate terraform.tfstate.backup
 
 invoke: ## Invoke the deployed lambda function
-	@cat scripts/lambda_message.txt | glow
-	AWS_PROFILE=localstack aws lambda invoke --function-name myfunction --payload '{}' /dev/stdout | jq .
+	@cat scripts/lambda_message.txt
+	aws lambda invoke --function-name myfunction --payload '{}' /dev/stdout | jq .
 
 .PHONY: apply plan reset invoke init
