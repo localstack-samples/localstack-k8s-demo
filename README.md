@@ -26,7 +26,7 @@ architecture-beta
 
 - Make sure your `LOCALSTACK_AUTH_TOKEN` is in your shell environment
 - Install
-    - [`minikube`](https://minikube.sigs.k8s.io/docs/start/) but any local Kubernetes cluster will work
+    - [`kind`](https://kind.sigs.k8s.io/) but any local Kubernetes cluster will work
     - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu` when running `make` commands)
     - [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
     - [`helm`](https://helm.sh/docs/intro/install/)
@@ -37,7 +37,7 @@ architecture-beta
 ## Walkthrough
 
 1. Deploy the cluster: `make start`
-    - This starts a local Kubernetes cluster using `minikube` and fetches the Docker images for LocalStack and the demo application
+    - This starts a local Kubernetes cluster using `kind` and fetches the Docker images for LocalStack and the demo application
 2. Start the LocalStack operator: `make deploy-operator`. By default this uses the latest version, but you can specify `make deploy-operator OPERATOR_VERSION=v0.4.0` for example to use a specific version.
 3. Deploy LocalStack: `make deploy-localstack-instance port-forward`
     - This installs LocalStack into the Kubernetes cluster using our Kubernetes operator
@@ -51,4 +51,4 @@ architecture-beta
 
 - To remove the deployed application, run `make destroy-app`
 - To remove LocalStack from the Kubernetes cluster, run `make destroy-localstack-instance`
-- For removal of the Kubernetes cluster as well, run `minikube delete` to delete the local Kubernetes cluster
+- For removal of the Kubernetes cluster as well, run `make stop` to delete the local Kubernetes cluster

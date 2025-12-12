@@ -1,13 +1,19 @@
 TF_CMD ?= terraform
 OPERATOR_VERSION ?= latest
+CLUSTER_NAME ?= ls-k8s-demo
 
 usage:                    ## Show this help
 	@grep -Fh "##" $(MAKEFILE_LIST) | grep -Fv fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "%-25s %s\n", $$1, $$2 }'
 
 start: start-cluster
 
+stop: stop-cluster
+
 start-cluster:
-	bash ./scripts/start_cluster.sh
+	kind create cluster --name $(CLUSTER_NAME)
+
+stop-cluster:
+	kind delete cluster --name $(CLUSTER_NAME)
 
 deploy-operator:
 	kubectl apply --server-side -f https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
