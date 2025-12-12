@@ -26,27 +26,30 @@ architecture-beta
 
 - Make sure your `LOCALSTACK_AUTH_TOKEN` is in your shell environment
 - Install
-  - [`minikube`](https://minikube.sigs.k8s.io/docs/start/) but any local Kubernetes cluster will work
-  - [`tflocal`](https://docs.localstack.cloud/user-guide/integrations/terraform/)
-  - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu`)
-  - [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
-  - [`helm`](https://helm.sh/docs/intro/install/)
-  - (optional) [`k9s`](https://k9scli.io/)
+    - [`minikube`](https://minikube.sigs.k8s.io/docs/start/) but any local Kubernetes cluster will work
+    - [`tflocal`](https://docs.localstack.cloud/user-guide/integrations/terraform/)
+    - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu`)
+    - [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
+    - [`helm`](https://helm.sh/docs/intro/install/)
+    - (optional) [`k9s`](https://k9scli.io/)
 - Install Python dependencies into a virtual environment: `python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && source .venv/bin/activate`
 - Run `make init` to set up the terraform providers
 
 ## Walkthrough
 
 1. Deploy the cluster: `make start`
-   - This starts a local Kubernetes cluster using `minikube` and fetches the Docker images for LocalStack and the demo application
-2. Deploy LocalStack: `make deploy-localstack`
-   - This installs LocalStack into the Kubernetes cluster using `helm`
-3. Deploy application: `make reset apply`
-   - This resets the terraform state and applies the Terraform configuration, which creates the database and Lambda function
-4. Invoke the lambda function: `make invoke`
-   - This invokes the Lambda function and demonstrates that it can connect to the database
+    - This starts a local Kubernetes cluster using `minikube` and fetches the Docker images for LocalStack and the demo application
+2. Start the LocalStack operator: `make deploy-operator`. By default this uses the latest version, but you can specify `make deploy-operator OPERATOR_VERSION=v0.4.0` for example to use a specific version.
+3. Deploy LocalStack: `make deploy-localstack-instance port-forward`
+    - This installs LocalStack into the Kubernetes cluster using our Kubernetes operator
+    - It also port forwards port 4566 to the host (blocks the shell)
+4. Deploy application: `make reset apply`
+    - This resets the terraform state and applies the Terraform configuration, which creates the database and Lambda function
+5. Invoke the lambda function: `make invoke`
+    - This invokes the Lambda function and demonstrates that it can connect to the database
 
 ## Cleanup
 
-- To remove LocalStack from the Kubernetes cluster, run `helm uninstall localstack`
+- To remove the deployed application, run `make destroy-app`
+- To remove LocalStack from the Kubernetes cluster, run `make destroy-localstack-instance`
 - For removal of the Kubernetes cluster as well, run `minikube delete` to delete the local Kubernetes cluster

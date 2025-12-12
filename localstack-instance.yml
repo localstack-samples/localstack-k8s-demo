@@ -1,0 +1,14 @@
+apiVersion: api.localstack.cloud/v1alpha1
+kind: LocalStack
+metadata:
+    name: env-1
+    namespace: workspace
+spec:
+    image: localstack/localstack-pro
+    dnsProvider: coredns
+    dnsConfigName: coredns
+    dnsConfigNamespace: kube-system
+    debug: "trace"
+    envFrom:
+        - secretRef:
+              name: localstack-auth-token
