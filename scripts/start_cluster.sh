@@ -28,8 +28,6 @@ pull-images() {
     pull-image docker.io/localstack/lambda-python:3.12
     pull-image docker.io/localstack/localstack-pro:latest
     pull-image docker.io/library/mysql:8.4.5
-    pull-image gcr.io/kubebuilder/kube-rbac-proxy:v0.15.0
-    pull-image localstack/localstack-k8s-operator:v0.3.3
 }
 
 reset

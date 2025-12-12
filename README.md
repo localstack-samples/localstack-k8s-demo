@@ -27,13 +27,11 @@ architecture-beta
 - Make sure your `LOCALSTACK_AUTH_TOKEN` is in your shell environment
 - Install
     - [`minikube`](https://minikube.sigs.k8s.io/docs/start/) but any local Kubernetes cluster will work
-    - [`tflocal`](https://docs.localstack.cloud/user-guide/integrations/terraform/)
-    - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu`)
+    - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu` when running `make` commands)
     - [`kubectl`](https://kubernetes.io/docs/reference/kubectl/)
     - [`helm`](https://helm.sh/docs/intro/install/)
     - (optional) [`k9s`](https://k9scli.io/)
-- Ensure your [AWS CLI is configured to communicate with LocalStack instead of AWS](https://docs.localstack.cloud/aws/integrations/aws-native-tools/aws-cli/#configuring-a-custom-profile).
-- Install Python dependencies into a virtual environment: `python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && source .venv/bin/activate`
+- Ensure your [environment is configured to communicate with LocalStack instead of AWS](https://docs.localstack.cloud/aws/integrations/aws-native-tools/aws-cli/#configuring-a-custom-profile).
 - Run `make init` to set up the terraform providers
 
 ## Walkthrough
@@ -44,10 +42,9 @@ architecture-beta
 3. Deploy LocalStack: `make deploy-localstack-instance port-forward`
     - This installs LocalStack into the Kubernetes cluster using our Kubernetes operator
     - It also port forwards port 4566 to the host (blocks the shell)
-4. Initialize terraform: `make init`
-5. Deploy application: `make reset apply`
+4. Deploy application: `make reset apply`
     - This resets the terraform state and applies the Terraform configuration, which creates the database and Lambda function
-6. Invoke the lambda function: `make invoke`
+5. Invoke the lambda function: `make invoke`
     - This invokes the Lambda function and demonstrates that it can connect to the database
 
 ## Cleanup

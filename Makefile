@@ -1,3 +1,4 @@
+TF_CMD ?= terraform
 OPERATOR_VERSION ?= latest
 
 usage:                    ## Show this help
@@ -42,16 +43,16 @@ port-forward: ## Forward the LocalStack port to the host
 	while ! bash ./scripts/port_forward.sh; do sleep 5; done
 
 init:  ## Set up terraform project
-	tflocal init
+	${TF_CMD} init
 
 plan:  ## Execute terraform plan
-	tflocal plan
+	${TF_CMD} plan
 
 apply:  ## Deploy terraform application
-	tflocal apply -auto-approve
+	${TF_CMD} apply -auto-approve
 
 destroy-app:  ## Destroy the application
-	tflocal apply -destroy -auto-approve
+	${TF_CMD} apply -destroy -auto-approve
 
 reset: ## Reset terraform state
 	rm -f terraform.tfstate terraform.tfstate.backup
