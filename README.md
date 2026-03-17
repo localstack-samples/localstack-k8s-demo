@@ -20,11 +20,11 @@ architecture-beta
 ```
 
 > [!NOTE]
-> LocalStack's Kubernetes integration is only available on our Enterprise tier.
+> LocalStack's Kubernetes integration is only available on our [Enterprise tier](https://localstack.cloud/pricing).
 
 ## Setup
 
-- Make sure your `LOCALSTACK_AUTH_TOKEN` is in your shell environment
+- Make sure you have an active LocalStack for AWS license & `LOCALSTACK_AUTH_TOKEN` is in your shell environment
 - Install
     - [`kind`](https://kind.sigs.k8s.io/) but any local Kubernetes cluster will work
     - [`terraform`](https://www.terraform.io/downloads) or [`opentofu`](https://opentofu.org/downloads) (if using `tofu`, set `TF_CMD=tofu` when running `make` commands)
