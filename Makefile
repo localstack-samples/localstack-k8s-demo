@@ -1,5 +1,5 @@
 TF_CMD ?= terraform
-OPERATOR_VERSION ?= v0.4.3
+OPERATOR_VERSION ?= latest
 CLUSTER_NAME ?= ls-k8s-demo
 
 usage:                    ## Show this help
@@ -16,10 +16,10 @@ stop-cluster:
 	kind delete cluster --name $(CLUSTER_NAME)
 
 deploy-operator:
-	kubectl apply --server-side -f https://raw.githubusercontent.com/localstack/localstack-operator/${OPERATOR_VERSION}/controller.yaml
+	kubectl apply --server-side -f https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
 
 destroy-operator:
-	kubectl delete -f https://raw.githubusercontent.com/localstack/localstack-operator/${OPERATOR_VERSION}/controller.yaml
+	kubectl delete -f  https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
 
 deploy-localstack-instance: deploy-secret
 	kubectl apply --server-side -f ./localstack-instance.yml
