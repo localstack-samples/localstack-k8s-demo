@@ -38,14 +38,25 @@ architecture-beta
 
 1. Deploy the cluster: `make start`
     - This starts a local Kubernetes cluster using `kind` and fetches the Docker images for LocalStack and the demo application
-2. Start the LocalStack operator: `make deploy-operator`. By default this uses the latest version, but you can specify `make deploy-operator OPERATOR_VERSION=v0.4.0` for example to use a specific version.
+2. Start the LocalStack operator: `make deploy-operator`. By default this uses the latest version, but you can specify `make deploy-operator OPERATOR_VERSION=v0.4.17` for example to use a specific version.
 3. Deploy LocalStack: `make deploy-localstack-instance port-forward`
     - This installs LocalStack into the Kubernetes cluster using our Kubernetes operator
     - It also port forwards port 4566 to the host (blocks the shell)
 4. Deploy application: `make reset apply`
     - This resets the terraform state and applies the Terraform configuration, which creates the database and Lambda function
+    - The Lambda function is built for `arm64` (Apple silicon) by default. On an x86_64 machine, run `TF_VAR_lambda_architecture=x86_64 make reset apply` so its dependencies match the architecture of the Lambda pod.
 5. Invoke the lambda function: `make invoke`
     - This invokes the Lambda function and demonstrates that it can connect to the database
+
+## Testing
+
+With the port forward running and the application deployed, run `make test`. It checks that:
+
+- LocalStack answers on `localhost:4566` and the `k8sdb` database is available
+- the Lambda function returns the two rows it inserted into the database
+- the database and the function run as pods (`ls-mysql-*` and `lambda-myfunction-*`) in the `workspace` namespace
+
+The GitHub Actions workflow in `.github/workflows/main.yml` runs the whole walkthrough in a `kind` cluster on every pull request.
 
 ## Cleanup
 

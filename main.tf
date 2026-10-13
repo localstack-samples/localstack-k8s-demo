@@ -13,6 +13,18 @@ variable "database_password" {
   default = "password"
 }
 
+# arm64 matches Apple silicon. Use x86_64 on x86 machines (e.g. TF_VAR_lambda_architecture=x86_64),
+# so the dependencies are built for the architecture the Lambda pod runs on.
+variable "lambda_architecture" {
+  type    = string
+  default = "arm64"
+
+  validation {
+    condition     = contains(["arm64", "x86_64"], var.lambda_architecture)
+    error_message = "lambda_architecture must be arm64 or x86_64."
+  }
+}
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "~> 6.0"
@@ -23,8 +35,8 @@ module "vpc" {
 }
 
 module "db" {
-  source  = "terraform-aws-modules/rds/aws"
-  version = "~> 6.0"
+  source     = "terraform-aws-modules/rds/aws"
+  version    = "~> 6.0"
   identifier = "k8sdb"
 
   engine               = "mysql"
@@ -59,12 +71,10 @@ module "lambda_function" {
   }
 
   build_in_docker = true
-  # Only include if on a silicon mac
   docker_additional_options = [
-    "--platform", "linux/arm64",
+    "--platform", var.lambda_architecture == "arm64" ? "linux/arm64" : "linux/amd64",
   ]
 
-
-  architectures = ["arm64"]
+  architectures = [var.lambda_architecture]
   source_path   = "./lambda-src"
 }

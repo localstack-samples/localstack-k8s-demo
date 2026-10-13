@@ -2,6 +2,12 @@ TF_CMD ?= terraform
 OPERATOR_VERSION ?= latest
 CLUSTER_NAME ?= ls-k8s-demo
 
+ifeq ($(OPERATOR_VERSION),latest)
+OPERATOR_URL = https://github.com/localstack/localstack-operator/releases/latest/download/controller.yaml
+else
+OPERATOR_URL = https://github.com/localstack/localstack-operator/releases/download/$(OPERATOR_VERSION)/controller.yaml
+endif
+
 usage:                    ## Show this help
 	@grep -Fh "##" $(MAKEFILE_LIST) | grep -Fv fgrep | sed -e 's/:.*##\s*/##/g' | awk -F'##' '{ printf "%-25s %s\n", $$1, $$2 }'
 
@@ -16,10 +22,10 @@ stop-cluster:
 	kind delete cluster --name $(CLUSTER_NAME)
 
 deploy-operator:
-	kubectl apply --server-side -f https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
+	kubectl apply --server-side -f $(OPERATOR_URL)
 
 destroy-operator:
-	kubectl delete -f  https://github.com/localstack/localstack-operator/releases/${OPERATOR_VERSION}/download/controller.yaml
+	kubectl delete -f $(OPERATOR_URL)
 
 deploy-localstack-instance: deploy-secret
 	kubectl apply --server-side -f ./localstack-instance.yml
@@ -67,4 +73,7 @@ invoke: ## Invoke the deployed lambda function
 	@cat scripts/lambda_message.txt
 	aws lambda invoke --function-name myfunction --payload '{}' /dev/stdout | jq .
 
-.PHONY: apply plan reset invoke init
+test: ## Check the Lambda function queries the database and both run as pods
+	bash ./test.sh
+
+.PHONY: apply plan reset invoke init test
