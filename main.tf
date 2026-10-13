@@ -27,7 +27,7 @@ variable "lambda_architecture" {
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> 6.0"
+  version = "6.7.3"
 
   manage_default_network_acl    = false
   manage_default_route_table    = false
@@ -36,7 +36,7 @@ module "vpc" {
 
 module "db" {
   source     = "terraform-aws-modules/rds/aws"
-  version    = "~> 6.0"
+  version    = "6.13.1"
   identifier = "k8sdb"
 
   engine               = "mysql"
@@ -56,7 +56,7 @@ module "db" {
 
 module "lambda_function" {
   source  = "terraform-aws-modules/lambda/aws"
-  version = "~> 8.0"
+  version = "8.12.0"
 
   function_name = "myfunction"
   handler       = "index.handler"
