@@ -1,0 +1,86 @@
+name: Deploy on Kubernetes
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kubernetes:
+    name: Run LocalStack and the demo in kind
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://localhost:4566
+      # The runner is x86_64, so build and run the Lambda for that architecture
+      TF_VAR_lambda_architecture: x86_64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Install kind
+        uses: helm/kind-action@v1.15.0
+        with:
+          install_only: true
+
+      - name: Create the cluster
+        run: make start
+
+      - name: Deploy the LocalStack operator
+        run: |
+          make deploy-operator
+          kubectl -n localstack-operator-system rollout status deployment/localstack-operator-controller-manager --timeout=300s
+
+      - name: Deploy LocalStack
+        env:
+          LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+        run: |
+          make deploy-localstack-instance
+          for i in $(seq 1 60); do
+            kubectl -n workspace get pods -o name | grep -q . && break
+            sleep 5
+          done
+          kubectl -n workspace wait --for=condition=Ready pod --all --timeout=600s
+
+      - name: Forward the LocalStack port
+        run: |
+          nohup make port-forward > port-forward.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf localhost:4566/_localstack/health > /dev/null && exit 0
+            sleep 5
+          done
+          cat port-forward.log
+          exit 1
+
+      - name: Deploy the database and the Lambda function
+        run: make init apply
+
+      - name: Run tests
+        run: make test
+
+      - name: Show cluster state and LocalStack logs
+        if: failure()
+        run: |
+          kubectl get pods -A -o wide || true
+          kubectl -n workspace describe pods || true
+          kubectl -n workspace get events --sort-by=.lastTimestamp || true
+          kubectl -n workspace logs svc/localstack-env-1 --tail=400 || true
+          cat port-forward.log || true
